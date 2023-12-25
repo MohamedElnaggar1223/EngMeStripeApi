@@ -58,8 +58,8 @@ app.post('/create-checkout-session', async (req, res) => {
         payment_method_types: ["card"],
         line_items: [programItem],
         mode: "payment",
-        success_url: "http://localhost:5173",
-        cancel_url: "http://localhost:5173",
+        success_url: "https://eng-me-black.vercel.app/",
+        cancel_url: "https://eng-me-black.vercel.app/",
         metadata: {
             studentId,
             programId: program.id
