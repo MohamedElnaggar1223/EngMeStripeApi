@@ -44,7 +44,7 @@ app.post('/create-checkout-session', async (req, res) => {
 
     const programItem = {
         price_data: {
-            currency: "usd",
+            currency: "egp",
             product_data: {
                 name: program.name,
                 images: [program.image]
