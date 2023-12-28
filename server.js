@@ -54,8 +54,8 @@ app.post('/generate-teacher-account', async (req, res) => {
     
         const accountLink = await stripe.accountLinks.create({
             account: stripeAccount,
-            refresh_url: 'http://localhost:5173',
-            return_url: 'http://localhost:5173',
+            refresh_url: 'https://eng-me-black.vercel.app',
+            return_url: 'https://eng-me-black.vercel.app',
             type: 'account_onboarding'
         })
     
@@ -92,8 +92,8 @@ app.post('/create-teacher-account', async (req, res) => {
 
     const accountLink = await stripe.accountLinks.create({
         account: account.id,
-        refresh_url: 'http://localhost:5173',
-        return_url: 'http://localhost:5173',
+        refresh_url: 'https://eng-me-black.vercel.app',
+        return_url: 'https://eng-me-black.vercel.app',
         type: 'account_onboarding'
     })
     
