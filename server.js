@@ -2,6 +2,7 @@ require("dotenv").config()
 const express = require("express")
 const cors = require("cors")
 const axios = require('axios');
+const corsOptions = require('./corsOptions')
 const bodyParser = require('body-parser')
 //@ts-ignore
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
@@ -34,7 +35,7 @@ admin.initializeApp({
 
 const app = express()
 
-app.use(cors())
+app.use(cors(corsOptions))
 app.use(express.json())
 
 app.use(bodyParser.json())
@@ -185,7 +186,7 @@ app.post('/create-checkout-session', async (req, res) => {
         cancel_url: "https://eng-me-black.vercel.app/",
         payment_intent_data: {
             transfer_data: {
-                destination: accountId, // Replace with the teacher's connected Stripe account ID
+                destination: accountId,
                 amount: Math.floor((program.price * ( Number(program.teacherShare) / 100 )) * 100),
             },
         },
