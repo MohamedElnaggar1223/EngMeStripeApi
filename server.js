@@ -169,7 +169,7 @@ app.post('/create-checkout-session', async (req, res) => {
             currency: "egp",
             product_data: {
                 name: program.name,
-                images: [program.image.length < 2048 ? program.image : 'https://firebasestorage.googleapis.com/v0/b/engmedemo.appspot.com/o/ProgramImages%2Fcardpic-min.png?alt=media&token=6e306470-2c2f-46fb-be2f-bb8a948741e2']
+                images: [program.image.length < 2048 && program.image.length > 0 ? program.image : 'https://firebasestorage.googleapis.com/v0/b/engmedemo.appspot.com/o/ProgramImages%2Fcardpic-min.png?alt=media&token=6e306470-2c2f-46fb-be2f-bb8a948741e2']
             },
             unit_amount: program.price * 100
         },
