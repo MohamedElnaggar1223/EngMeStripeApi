@@ -1,8 +1,6 @@
 require("dotenv").config()
 const express = require("express")
 const cors = require("cors")
-const axios = require('axios');
-const corsOptions = require('./corsOptions')
 const bodyParser = require('body-parser')
 //@ts-ignore
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
@@ -35,7 +33,7 @@ admin.initializeApp({
 
 const app = express()
 
-app.use(cors(corsOptions))
+app.use(cors())
 app.use(express.json())
 
 app.use(bodyParser.json())
@@ -55,7 +53,7 @@ app.post('/generate-teacher-account', async (req, res) => {
     
         const accountLink = await stripe.accountLinks.create({
             account: stripeAccount,
-            refresh_url: 'https://eng-me-black.vercel.app',
+            refresh_url: 'https://stripe.com',
             return_url: 'https://eng-me-black.vercel.app',
             type: 'account_onboarding'
         })
@@ -93,7 +91,7 @@ app.post('/create-teacher-account', async (req, res) => {
 
     const accountLink = await stripe.accountLinks.create({
         account: account.id,
-        refresh_url: 'https://eng-me-black.vercel.app',
+        refresh_url: 'https://stripe.com/',
         return_url: 'https://eng-me-black.vercel.app',
         type: 'account_onboarding'
     })
