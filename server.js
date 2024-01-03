@@ -38,6 +38,10 @@ app.use(express.json())
 
 app.use(bodyParser.json())
 
+app.get('/', (req, res) => {
+    return res.status(200).json({ message: 'Api activated' })
+})
+
 app.post('/generate-teacher-account', async (req, res) => {
     const { teacher } = req.body
 
