@@ -129,6 +129,8 @@ app.post('/create-teacher-account', async (req, res) => {
         university: 'The German University in Cairo',
         averageRating: 0,
         profileViews: 0,
+        occupation: request.occupation,
+        why: request.why,
         firstLoginLink: accountLink.url,
         stripeId: addedTeacherStripe.id
     })
