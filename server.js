@@ -184,7 +184,7 @@ app.post('/create-checkout-session', async (req, res) => {
         payment_method_types: ["card"],
         line_items: [programItem],
         mode: "payment",
-        success_url: "https://eng-me-black.vercel.app/",
+        success_url: `https://eng-me-black.vercel.app/programs/current/${program.id}`,
         cancel_url: "https://eng-me-black.vercel.app/",
         payment_intent_data: {
             transfer_data: {
