@@ -77,7 +77,7 @@ app.post('/create-teacher-account', async (req, res) => {
 
     const account = await stripe.accounts.create({
         type: 'express',
-        country: 'EG',
+        country: 'US',
         email: request.email,
         capabilities: {
             transfers: {
@@ -172,7 +172,7 @@ app.post('/create-checkout-session', async (req, res) => {
 
     const programItem = {
         price_data: {
-            currency: "egp",
+            currency: "usd",
             product_data: {
                 name: program.name,
                 images: [program.image.length < 2048 && program.image.length > 0 ? program.image : 'https://firebasestorage.googleapis.com/v0/b/engmedemo.appspot.com/o/ProgramImages%2Fcardpic-min.png?alt=media&token=6e306470-2c2f-46fb-be2f-bb8a948741e2']
