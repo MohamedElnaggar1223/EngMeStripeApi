@@ -147,6 +147,7 @@ app.post('/create-teacher-account', async (req, res) => {
         },
         ],
         teacherId: uid,
+        hourlyRate: 0
     })
 
     const userRef = db.collection('users')
