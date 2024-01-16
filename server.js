@@ -168,6 +168,8 @@ app.post('/create-checkout-session', async (req, res) => {
 
     const teacherStripeRef = db.collection('teacherStripe')
 
+    console.log('TestApi')
+
     if(program)
     {
         const teacherStripeData = await teacherStripeRef.where('teacherId', '==', program.teacherId).limit(1).get()
@@ -208,6 +210,7 @@ app.post('/create-checkout-session', async (req, res) => {
     }
     else if(teacherId)
     {
+        console.log(teacherId)
         const teacherStripeData = await teacherStripeRef.where('teacherId', '==', teacherId).limit(1).get()
     
         const accountId = teacherStripeData.docs[0].data().stripeAccount
