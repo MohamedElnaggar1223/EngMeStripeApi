@@ -162,46 +162,88 @@ app.post('/create-teacher-account', async (req, res) => {
 })
 
 app.post('/create-checkout-session', async (req, res) => {
-    const { program, studentId } = req.body
+    const { program, studentId, teacherId, hourlyRate } = req.body
 
     const db = admin.firestore()
 
     const teacherStripeRef = db.collection('teacherStripe')
-    const teacherStripeData = await teacherStripeRef.where('teacherId', '==', program.teacherId).limit(1).get()
 
-    const accountId = teacherStripeData.docs[0].data().stripeAccount
-
-    const programItem = {
-        price_data: {
-            currency: "usd",
-            product_data: {
-                name: program.name,
-                images: [program.image.length < 2048 && program.image.length > 0 ? program.image : 'https://firebasestorage.googleapis.com/v0/b/engmedemo.appspot.com/o/ProgramImages%2Fcardpic-min.png?alt=media&token=6e306470-2c2f-46fb-be2f-bb8a948741e2']
+    if(program)
+    {
+        const teacherStripeData = await teacherStripeRef.where('teacherId', '==', program.teacherId).limit(1).get()
+    
+        const accountId = teacherStripeData.docs[0].data().stripeAccount
+    
+        const programItem = {
+            price_data: {
+                currency: "usd",
+                product_data: {
+                    name: program.name,
+                    images: [program.image.length < 2048 && program.image.length > 0 ? program.image : 'https://firebasestorage.googleapis.com/v0/b/engmedemo.appspot.com/o/ProgramImages%2Fcardpic-min.png?alt=media&token=6e306470-2c2f-46fb-be2f-bb8a948741e2']
+                },
+                unit_amount: program.price * 100
             },
-            unit_amount: program.price * 100
-        },
-        quantity: 1
-    }
-
-    const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        line_items: [programItem],
-        mode: "payment",
-        success_url: `https://eng-me-black.vercel.app/programs/current/${program.id}`,
-        cancel_url: "https://eng-me-black.vercel.app/",
-        payment_intent_data: {
-            transfer_data: {
-                destination: accountId,
-                amount: Math.floor((program.price * ( Number(program.teacherShare) / 100 )) * 100),
-            },
-        },
-        metadata: {
-            studentId,
-            programId: program.id
+            quantity: 1
         }
-    })
+    
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items: [programItem],
+            mode: "payment",
+            success_url: `https://eng-me-black.vercel.app/programs/current/${program.id}`,
+            cancel_url: "https://eng-me-black.vercel.app/",
+            payment_intent_data: {
+                transfer_data: {
+                    destination: accountId,
+                    amount: Math.floor((program.price * ( Number(program.teacherShare) / 100 )) * 100),
+                },
+            },
+            metadata: {
+                studentId,
+                programId: program.id
+            }
+        })
+    
+        return res.json({ id: session.id })
+    }
+    else if(teacherId)
+    {
+        const teacherStripeData = await teacherStripeRef.where('teacherId', '==', teacherId).limit(1).get()
+    
+        const accountId = teacherStripeData.docs[0].data().stripeAccount
 
-    res.json({ id: session.id })
+        const consultationItem = {
+            price_data: {
+                currency: "usd",
+                product_data: {
+                    name: 'Consultation Session',
+                    images: ['https://firebasestorage.googleapis.com/v0/b/engmedemo.appspot.com/o/ProgramImages%2Fcardpic-min.png?alt=media&token=6e306470-2c2f-46fb-be2f-bb8a948741e2']
+                },
+                unit_amount: Number(hourlyRate) * 100
+            },
+            quantity: 1
+        }
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items: [consultationItem],
+            mode: "payment",
+            success_url: `https://eng-me-black.vercel.app/`,
+            cancel_url: "https://eng-me-black.vercel.app/",
+            payment_intent_data: {
+                transfer_data: {
+                    destination: accountId,
+                    amount: Number(hourlyRate) * 100,
+                },
+            },
+            metadata: {
+                studentId,
+                teacherId
+            }
+        })
+    
+        return res.json({ id: session.id })
+    }
 })
 
 app.post('/callback', async (req, res) => {
@@ -228,15 +270,28 @@ app.post('/callback', async (req, res) => {
     {
         if(req.body.data.object.payment_status === 'paid')
         {
-
-            const newOrder = {
-                studentId: req.body.data.object.metadata.studentId,
-                programId: req.body.data.object.metadata.programId,
-                orderId: req.body.data.object.id,
-                status: 'accepted'
+            if(req.body.data.object.metadata.programId)
+            {
+                const newOrder = {
+                    studentId: req.body.data.object.metadata.studentId,
+                    programId: req.body.data.object.metadata.programId,
+                    orderId: req.body.data.object.id,
+                    status: 'accepted'
+                }
+    
+                await db.collection('orders').add(newOrder)
             }
-
-            await db.collection('orders').add(newOrder)
+            else if(req.body.data.object.metadata.teacherId)
+            {
+                const newOrder = {
+                    studentId: req.body.data.object.metadata.studentId,
+                    teacherId: req.body.data.object.metadata.teacherId,
+                    orderId: req.body.data.object.id,
+                    status: 'accepted'
+                }
+    
+                await db.collection('ordersConsultations').add(newOrder)
+            }
         }
     }
     else if(req.body.type === 'capability.updated')
