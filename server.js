@@ -215,8 +215,6 @@ app.post('/create-checkout-session', async (req, res) => {
     
         const accountId = teacherStripeData.docs[0].data().stripeAccount
 
-        console.log(accountId, Number(hourlyRate) * 100)
-
         const consultationItem = {
             price_data: {
                 currency: "usd",
@@ -224,7 +222,7 @@ app.post('/create-checkout-session', async (req, res) => {
                     name: 'Consultation Session',
                     images: ['https://firebasestorage.googleapis.com/v0/b/engmedemo.appspot.com/o/ProgramImages%2Fcardpic-min.png?alt=media&token=6e306470-2c2f-46fb-be2f-bb8a948741e2']
                 },
-                unit_amount: Number(hourlyRate) * 100
+                unit_amount: parseFloat(hourlyRate) * 100
             },
             quantity: 1
         }
@@ -238,7 +236,7 @@ app.post('/create-checkout-session', async (req, res) => {
             payment_intent_data: {
                 transfer_data: {
                     destination: accountId,
-                    amount: Number(hourlyRate) * 100,
+                    amount: parseFloat(hourlyRate) * 100,
                 },
             },
             metadata: {
