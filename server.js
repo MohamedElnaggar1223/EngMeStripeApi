@@ -206,7 +206,7 @@ app.post('/create-checkout-session', async (req, res) => {
             }
         })
     
-        return res.json({ id: session.id })
+        res.json({ id: session.id })
     }
     else if(teacherId)
     {
@@ -247,7 +247,7 @@ app.post('/create-checkout-session', async (req, res) => {
             }
         })
     
-        return res.json({ id: session.id })
+        res.json({ id: session.id })
     }
 })
 
