@@ -212,6 +212,8 @@ app.post('/create-checkout-session', async (req, res) => {
     
         const accountId = teacherStripeData.docs[0].data().stripeAccount
 
+        console.log(accountId, Number(hourlyRate) * 100)
+
         const consultationItem = {
             price_data: {
                 currency: "usd",
