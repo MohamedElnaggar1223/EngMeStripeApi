@@ -58,7 +58,7 @@ app.post('/generate-teacher-account', async (req, res) => {
         const accountLink = await stripe.accountLinks.create({
             account: stripeAccount,
             refresh_url: 'https://stripe.com',
-            return_url: 'https://eng-me-black.vercel.app',
+            return_url: 'https://engme.org',
             type: 'account_onboarding'
         })
     
@@ -96,7 +96,7 @@ app.post('/create-teacher-account', async (req, res) => {
     const accountLink = await stripe.accountLinks.create({
         account: account.id,
         refresh_url: 'https://stripe.com/',
-        return_url: 'https://eng-me-black.vercel.app',
+        return_url: 'https://engme.org',
         type: 'account_onboarding'
     })
     
@@ -193,8 +193,8 @@ app.post('/create-checkout-session', async (req, res) => {
             line_items: [programItem],
             mode: "payment",
             allow_promotion_codes: true,
-            success_url: `https://eng-me-black.vercel.app/programs/current/${program.id}`,
-            cancel_url: "https://eng-me-black.vercel.app/",
+            success_url: `https://engme.org/programs/current/${program.id}`,
+            cancel_url: "https://engme.org/",
             payment_intent_data: {
                 transfer_data: {
                     destination: accountId,
@@ -232,8 +232,8 @@ app.post('/create-checkout-session', async (req, res) => {
             payment_method_types: ["card"],
             line_items: [consultationItem],
             mode: "payment",
-            success_url: `https://eng-me-black.vercel.app/`,
-            cancel_url: "https://eng-me-black.vercel.app/",
+            success_url: `https://engme.org/`,
+            cancel_url: "https://engme.org/",
             payment_intent_data: {
                 transfer_data: {
                     destination: accountId,
