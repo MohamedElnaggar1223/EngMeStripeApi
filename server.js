@@ -77,7 +77,7 @@ app.post('/create-teacher-account', async (req, res) => {
 
     const account = await stripe.accounts.create({
         type: 'express',
-        country: 'US',
+        country: 'EG',
         email: request.email,
         capabilities: {
             transfers: {
