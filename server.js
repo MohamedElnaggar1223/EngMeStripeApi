@@ -183,7 +183,7 @@ app.post('/create-checkout-session', async (req, res) => {
                     name: program.name,
                     images: [program.image.length < 2048 && program.image.length > 0 ? program.image : 'https://firebasestorage.googleapis.com/v0/b/engmedemo.appspot.com/o/ProgramImages%2Fcardpic-min.png?alt=media&token=6e306470-2c2f-46fb-be2f-bb8a948741e2']
                 },
-                unit_amount: (program.price * (1 - (program?.discount ?? 0))) * 100
+                unit_amount: (program.price * (1 - ((program?.discount ?? 0) / 100))) * 100
             },
             quantity: 1
         }
@@ -198,7 +198,7 @@ app.post('/create-checkout-session', async (req, res) => {
             payment_intent_data: {
                 transfer_data: {
                     destination: accountId,
-                    amount: Math.floor(((program.price * (1 - (program?.discount ?? 0))) * ( Number(program.teacherShare) / 100 )) * 100),
+                    amount: Math.floor(((program.price * (1 - ((program?.discount ?? 0) / 100))) * ( Number(program.teacherShare) / 100 )) * 100),
                 },
             },
             metadata: {
