@@ -338,6 +338,7 @@ app.post('/callback', async (req, res) => {
             else if(req.body.data.object.metadata.programs)
             {   
                 const programs = JSON.parse(req.body.data.object.metadata.programs)
+                console.log('Programs: ', programs)
                 const programsOrders = programs.map(async (program) => {
                     const newOrder = {
                         studentId: req.body.data.object.metadata.studentId,
