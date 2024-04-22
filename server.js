@@ -347,7 +347,7 @@ app.post('/callback', async (req, res) => {
                         status: 'accepted'
                     }
         
-                    await db.collection('ordersConsultations').add(newOrder)
+                    await db.collection('orders').add(newOrder)
                 })
 
                 await Promise.all(programsOrders)
