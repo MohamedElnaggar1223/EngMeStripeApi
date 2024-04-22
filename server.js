@@ -281,7 +281,7 @@ app.post('/create-checkout-session', async (req, res) => {
             },
             metadata: {
                 studentId,
-                programs: bundle.programs
+                programs: JSON.stringify(bundle.programs)
             }
         })
     
@@ -337,7 +337,7 @@ app.post('/callback', async (req, res) => {
             }
             else if(req.body.data.object.metadata.programs)
             {   
-                const programs = req.body.data.object.metadata.programs
+                const programs = JSON.parse(req.body.data.object.metadata.programs)
                 const programsOrders = programs.map(async (program) => {
                     const newOrder = {
                         studentId: req.body.data.object.metadata.studentId,
