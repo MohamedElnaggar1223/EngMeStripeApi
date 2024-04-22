@@ -338,19 +338,14 @@ app.post('/callback', async (req, res) => {
             else if(req.body.data.object.metadata.programs)
             {   
                 const programs = JSON.parse(req.body.data.object.metadata.programs)
-                console.log('Programs: ', programs)
-                const programsOrders = programs.map(async (program) => {
-                    const newOrder = {
-                        studentId: req.body.data.object.metadata.studentId,
-                        programId: program,
-                        orderId: req.body.data.object.id,
-                        status: 'accepted'
-                    }
+                const newOrder = {
+                    studentId: req.body.data.object.metadata.studentId,
+                    programs: programs,
+                    orderId: req.body.data.object.id,
+                    status: 'accepted'
+                }
         
-                    await db.collection('orders').add(newOrder)
-                })
-
-                await Promise.all(programsOrders)
+                await db.collection('orders').add(newOrder)
             }
         }
     }
