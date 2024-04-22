@@ -162,7 +162,7 @@ app.post('/create-teacher-account', async (req, res) => {
 })
 
 app.post('/create-checkout-session', async (req, res) => {
-    const { program, studentId, teacherId, hourlyRate } = req.body
+    const { program, studentId, teacherId, hourlyRate, bundle } = req.body
 
     const db = admin.firestore()
 
@@ -248,6 +248,45 @@ app.post('/create-checkout-session', async (req, res) => {
     
         res.json({ id: session.id })
     }
+    else if(bundle) 
+    {
+        const teacherStripeData = await teacherStripeRef.where('teacherId', '==', bundle.teacherId).limit(1).get()
+
+        const accountId = teacherStripeData.docs[0].data().stripeAccount
+
+        const bundleItem = {
+            price_data: {
+                currency: "usd",
+                product_data: {
+                    name: "Bundle",
+                    images: [bundle.image.length < 2048 && bundle.image.length > 0 ? bundle.image : 'https://firebasestorage.googleapis.com/v0/b/engmedemo.appspot.com/o/ProgramImages%2Fcardpic-min.png?alt=media&token=6e306470-2c2f-46fb-be2f-bb8a948741e2']
+                },
+                unit_amount: (bundle.price * (1 - ((bundle?.discount ?? 0) / 100))) * 100
+            },
+            quantity: 1
+        }
+
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items: [bundleItem],
+            mode: "payment",
+            allow_promotion_codes: true,
+            success_url: `https://engme.org/programs`,
+            cancel_url: "https://engme.org/",
+            payment_intent_data: {
+                transfer_data: {
+                    destination: accountId,
+                    amount: Math.floor(((bundle.price * (1 - ((bundle?.discount ?? 0) / 100))) * ( Number(bundle.teacherShare) / 100 )) * 100),
+                },
+            },
+            metadata: {
+                studentId,
+                programs: bundle.programs
+            }
+        })
+    
+        res.json({ id: session.id })
+    }
 })
 
 app.post('/callback', async (req, res) => {
@@ -295,6 +334,22 @@ app.post('/callback', async (req, res) => {
                 }
     
                 await db.collection('ordersConsultations').add(newOrder)
+            }
+            else if(req.body.data.object.metadata.programs)
+            {   
+                const programs = req.body.data.object.metadata.programs
+                const programsOrders = programs.map(async (program) => {
+                    const newOrder = {
+                        studentId: req.body.data.object.metadata.studentId,
+                        teacherId: program,
+                        orderId: req.body.data.object.id,
+                        status: 'accepted'
+                    }
+        
+                    await db.collection('ordersConsultations').add(newOrder)
+                })
+
+                await Promise.all(programsOrders)
             }
         }
     }
