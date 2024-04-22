@@ -342,7 +342,7 @@ app.post('/callback', async (req, res) => {
                 const programsOrders = programs.map(async (program) => {
                     const newOrder = {
                         studentId: req.body.data.object.metadata.studentId,
-                        teacherId: program,
+                        programId: program,
                         orderId: req.body.data.object.id,
                         status: 'accepted'
                     }
