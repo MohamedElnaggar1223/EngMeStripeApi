@@ -306,7 +306,7 @@ app.post('/callback', async (req, res) => {
     
     if(event?.type)
     {
-
+        console.log("type: ", event.type)
     }
     else if(req.body.type === 'checkout.session.completed')
     {
