@@ -37,11 +37,11 @@ app.use(express.json())
 
 app.use(bodyParser.json())
 
-app.get('/api/', (req, res) => {
+app.get('/', (req, res) => {
     return res.status(200).json({ message: 'Api activated' })
 })
 
-app.post('/api/generate-teacher-account', async (req, res) => {
+app.post('/generate-teacher-account', async (req, res) => {
     const { teacher } = req.body
 
     const db = admin.firestore()
@@ -69,7 +69,7 @@ app.post('/api/generate-teacher-account', async (req, res) => {
     }
 })
 
-app.post('/api/create-teacher-account', async (req, res) => {
+app.post('/create-teacher-account', async (req, res) => {
     const { request, password } = req.body
 
     const db = admin.firestore()
@@ -160,7 +160,7 @@ app.post('/api/create-teacher-account', async (req, res) => {
     await teacherRequestRef.delete()
 })
 
-app.post('/api/create-checkout-session', async (req, res) => {
+app.post('/create-checkout-session', async (req, res) => {
     const { program, studentId, teacherId, hourlyRate, bundle } = req.body
 
     const db = admin.firestore()
@@ -288,7 +288,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
     }
 })
 
-app.post('/api/callback', async (req, res) => {
+app.post('/callback', async (req, res) => {
     const sig = req.headers['stripe-signature'];
 
     console.log('Entered Callback')
