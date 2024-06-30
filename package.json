@@ -2,11 +2,11 @@
   "name": "engmestripeapi",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "api/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon server",
-    "start": "node server",
+    "start": "node api/index.js",
     "build": "npm install"
   },
   "keywords": [],
