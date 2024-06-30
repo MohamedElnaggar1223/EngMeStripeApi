@@ -5,7 +5,6 @@ const bodyParser = require('body-parser')
 //@ts-ignore
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 
-
 const PORT = process.env.PORT || 3001
 
 const admin = require("firebase-admin")
