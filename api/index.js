@@ -289,6 +289,8 @@ app.post('/create-checkout-session', async (req, res) => {
 })
 
 app.post('/callback', async (req, res) => {
+    console.log('Entered Callback')
+
     const sig = req.headers['stripe-signature'];
 
     console.log('Entered Callback')
