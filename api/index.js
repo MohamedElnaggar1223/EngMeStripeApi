@@ -177,8 +177,11 @@ app.post('/create-checkout-session', async (req, res) => {
     
         const accountId = teacherStripeData.docs[0].data().stripeAccount
 
-        const price = typeof program.price === 'string' ? parseFloat(program.price) : program.price
-        const discount = typeof program.discount === 'string' ? parseFloat(program.discount) : program.discount
+        const price = typeof program.price === 'string' ? parseInt(program.price) : program.price
+        const discount = typeof program.discount === 'string' ? parseInt(program.discount) : program.discount
+
+        console.log("price: ", price)
+        console.log("discount: ", discount)
     
         const programItem = {
             price_data: {
