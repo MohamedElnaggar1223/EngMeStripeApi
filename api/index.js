@@ -205,7 +205,7 @@ app.post('/create-checkout-session', async (req, res) => {
             payment_intent_data: {
                 transfer_data: {
                     destination: accountId,
-                    amount: Math.floor(((program.price * (1 - ((program?.discount ?? 0) / 100))) * ( Number(program.teacherShare) / 100 )) * 100),
+                    amount: Math.floor(((price * (1 - ((discount ?? 0) / 100))) * ( Number(program.teacherShare) / 100 )) * 100),
                 },
             },
             metadata: {
