@@ -72,6 +72,8 @@ app.post('/generate-teacher-account', async (req, res) => {
 app.post('/create-teacher-account', async (req, res) => {
     const { request, password } = req.body
 
+    console.log(req.body)
+
     const db = admin.firestore()
 
     const account = await stripe.accounts.create({
