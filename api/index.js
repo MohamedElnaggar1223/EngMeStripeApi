@@ -174,6 +174,8 @@ app.post('/create-checkout-session', async (req, res) => {
         const teacherStripeData = await teacherStripeRef.where('teacherId', '==', program.teacherId).limit(1).get()
     
         const accountId = teacherStripeData.docs[0].data().stripeAccount
+
+        console.log(program)
     
         const programItem = {
             price_data: {
