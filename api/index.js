@@ -1,7 +1,7 @@
 require("dotenv").config()
 const express = require("express")
 const cors = require("cors")
-const corsOptions = require('./config/corsOptions')
+const CorsOptions = require('./config/corsOptions')
 const bodyParser = require('body-parser')
 //@ts-ignore
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
