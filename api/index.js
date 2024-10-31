@@ -1,6 +1,7 @@
 require("dotenv").config()
 const express = require("express")
 const cors = require("cors")
+const corsOptions = require('./config/corsOptions')
 const bodyParser = require('body-parser')
 //@ts-ignore
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
@@ -45,7 +46,7 @@ admin.initializeApp({
 
 const app = express()
 
-app.use(cors())
+app.use(cors(CorsOptions))
 app.use(express.json())
 
 app.use(bodyParser.json())
