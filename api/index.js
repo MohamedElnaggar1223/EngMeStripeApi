@@ -5,9 +5,22 @@ const bodyParser = require('body-parser')
 //@ts-ignore
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 
+const nodemailer = require('nodemailer')
+
 const PORT = process.env.PORT || 3001
 
 const admin = require("firebase-admin")
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS, 
+    }
+})
 
 var serviceAccount = {
     type: process.env.type,
@@ -39,6 +52,16 @@ app.use(bodyParser.json())
 
 app.get('/', (req, res) => {
     return res.status(200).json({ message: 'Api activated' })
+})
+
+app.post('/send-mail-company', async (req, res) => {
+    const { name, email, message } = req.body
+
+    transporter.sendMail({
+        to: ['admin@engme.org'],
+        subject: 'New Company Application',
+        html: `<h1>${name}</h1><br /><h2>${email}</h2><br /><p>${message}</p>`
+    })
 })
 
 app.post('/generate-teacher-account', async (req, res) => {
