@@ -63,6 +63,8 @@ app.post('/send-mail-company', async (req, res) => {
         subject: 'New Company Application',
         html: `<h1>Company Name: ${companyName}</h1><br /><h2><h2>Name: ${name}</h2><br />Email: ${email}</h2><br /><p>${message}</p>`
     })
+
+    return res.status(200).json({ message: 'Mail Sent' })
 })
 
 app.post('/generate-teacher-account', async (req, res) => {
