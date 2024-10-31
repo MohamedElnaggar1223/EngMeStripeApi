@@ -55,12 +55,12 @@ app.get('/', (req, res) => {
 })
 
 app.post('/send-mail-company', async (req, res) => {
-    const { name, email, message } = req.body
+    const { name, email, message, companyName } = req.body
 
     transporter.sendMail({
         to: ['admin@engme.org'],
         subject: 'New Company Application',
-        html: `<h1>${name}</h1><br /><h2>${email}</h2><br /><p>${message}</p>`
+        html: `<h1>Company Name: ${companyName}</h1><br /><h2><h2>Name: ${name}</h2><br />Email: ${email}</h2><br /><p>${message}</p>`
     })
 })
 
