@@ -339,6 +339,9 @@ app.post('/callback', async (req, res) => {
     }
     
     const db = admin.firestore()
+
+    console.log("event: ", event)
+    console.log("req.body: ", req.body)
     
     if(event?.type)
     {
