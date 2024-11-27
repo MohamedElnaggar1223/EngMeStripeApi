@@ -349,41 +349,66 @@ app.post('/callback', express.raw({type: 'application/json'}), async (req, res) 
     }
     else if(req.body.type === 'checkout.session.completed')
     {
-        if(req.body.data.object.payment_status === 'paid')
-        {
-            if(req.body.data.object.metadata.programId)
-            {
-                const newOrder = {
-                    studentId: req.body.data.object.metadata.studentId,
-                    programId: req.body.data.object.metadata.programId,
-                    orderId: req.body.data.object.id,
-                    status: 'accepted'
-                }
-    
-                await db.collection('orders').add(newOrder)
-            }
-            else if(req.body.data.object.metadata.teacherId)
-            {
-                const newOrder = {
-                    studentId: req.body.data.object.metadata.studentId,
-                    teacherId: req.body.data.object.metadata.teacherId,
-                    orderId: req.body.data.object.id,
-                    status: 'accepted'
-                }
-    
-                await db.collection('ordersConsultations').add(newOrder)
-            }
-            else if(req.body.data.object.metadata.programs)
-            {   
-                const programs = JSON.parse(req.body.data.object.metadata.programs)
-                const newOrder = {
-                    studentId: req.body.data.object.metadata.studentId,
-                    programs: programs,
-                    orderId: req.body.data.object.id,
-                    status: 'accepted'
-                }
+        if(req.body.data.object.payment_status === 'paid') {
+            // Generate a unique order ID that includes the payment ID to prevent duplicates
+            const uniqueOrderId = `order_${req.body.data.object.id}`;
+            
+            try {
+                // Use a transaction to ensure atomicity
+                await db.runTransaction(async (transaction) => {
+                    // Check if this order already exists
+                    const orderRef = db.collection('orders').doc(uniqueOrderId);
+                    const orderDoc = await transaction.get(orderRef);
+                    
+                    if (orderDoc.exists) {
+                        console.log(`Order ${uniqueOrderId} already processed, skipping`);
+                        return;
+                    }
         
-                await db.collection('orders').add(newOrder)
+                    let newOrder;
+                    if(req.body.data.object.metadata.programId) {
+                        newOrder = {
+                            studentId: req.body.data.object.metadata.studentId,
+                            programId: req.body.data.object.metadata.programId,
+                            orderId: req.body.data.object.id,
+                            status: 'accepted',
+                            createdAt: new Date(),
+                            processed: false
+                        };
+                        
+                        await transaction.set(orderRef, newOrder);
+                    }
+                    else if(req.body.data.object.metadata.teacherId) {
+                        const consultationRef = db.collection('ordersConsultations').doc(uniqueOrderId);
+                        newOrder = {
+                            studentId: req.body.data.object.metadata.studentId,
+                            teacherId: req.body.data.object.metadata.teacherId,
+                            orderId: req.body.data.object.id,
+                            status: 'accepted',
+                            createdAt: new Date(),
+                            processed: false
+                        };
+                        
+                        await transaction.set(consultationRef, newOrder);
+                    }
+                    else if(req.body.data.object.metadata.programs) {
+                        const programs = JSON.parse(req.body.data.object.metadata.programs);
+                        newOrder = {
+                            studentId: req.body.data.object.metadata.studentId,
+                            programs: programs,
+                            orderId: req.body.data.object.id,
+                            status: 'accepted',
+                            createdAt: new Date(),
+                            processed: false
+                        };
+                        
+                        await transaction.set(orderRef, newOrder);
+                    }
+                });
+            } catch (error) {
+                console.error('Error processing order:', error);
+                // Handle the error appropriately
+                throw error;
             }
         }
     }

@@ -5,7 +5,6 @@ const bodyParser = require('body-parser')
 //@ts-ignore
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
 
-
 const PORT = process.env.PORT || 3001
 
 const admin = require("firebase-admin")
@@ -71,7 +70,10 @@ app.post('/generate-teacher-account', async (req, res) => {
 })
 
 app.post('/create-teacher-account', async (req, res) => {
+    console.log('test')
     const { request, password } = req.body
+
+    console.log(req.body)
 
     const db = admin.firestore()
 
@@ -102,12 +104,12 @@ app.post('/create-teacher-account', async (req, res) => {
     
     const teacherRequestRef = db.doc(`teacherRequest/${request.id}`)
     
-    const user = await admin.auth().createUser({
+    const user = request.email !== "admin@test.com" ? await admin.auth().createUser({
         email: request.email,
         password
-    })
+    }) : null
 
-    const uid = user.uid
+    const uid = request.email !== "admin@test.com" ? user.uid : "6GDKGSalu2eNE0Rp8BszVBP0dDP2"
 
     const teacherStripeRef = db.collection('teacherStripe')
 
@@ -116,7 +118,9 @@ app.post('/create-teacher-account', async (req, res) => {
         stripeAccount: account.id
     })
 
-    
+    console.log(accountLink.url)
+
+    if(request.email !== "admin@test.com") {
     const teacherRef = db.doc(`teachers/${uid}`);
 
     await teacherRef.set({
@@ -134,6 +138,7 @@ app.post('/create-teacher-account', async (req, res) => {
         firstLoginLink: accountLink.url,
         stripeId: addedTeacherStripe.id
     })
+    }
 
     const scheduleRef = db.collection('teacherSchedule')
 
@@ -150,14 +155,15 @@ app.post('/create-teacher-account', async (req, res) => {
         hourlyRate: "0"
     })
 
+    
     const userRef = db.collection('users')
-
+    if(request.email !== "admin@test.com") {
     await userRef.add({
         userId: request.email,
         role: 'teacher',
         number: request.number,
     })
-
+    }
     await teacherRequestRef.delete()
 })
 
@@ -290,6 +296,8 @@ app.post('/create-checkout-session', async (req, res) => {
 })
 
 app.post('/callback', async (req, res) => {
+    console.log('Entered Callback')
+
     const sig = req.headers['stripe-signature'];
 
     console.log('Entered Callback')
@@ -307,7 +315,7 @@ app.post('/callback', async (req, res) => {
     
     if(event?.type)
     {
-
+        console.log("type: ", event.type)
     }
     else if(req.body.type === 'checkout.session.completed')
     {
