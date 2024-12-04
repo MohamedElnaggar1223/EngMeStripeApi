@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
     secure: false,
     auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, 
+        pass: process.env.EMAIL_PASS,
     }
 })
 
@@ -76,19 +76,18 @@ app.post('/generate-teacher-account', async (req, res) => {
 
     const teacherStripeDocs = await teacherStripeRef.get()
 
-    if(teacherStripeDocs?.docs.length && teacherStripeDocs?.docs[0]?.data())
-    {
+    if (teacherStripeDocs?.docs.length && teacherStripeDocs?.docs[0]?.data()) {
         const stripeAccount = teacherStripeDocs.docs[0].data().stripeAccount
-    
+
         const accountLink = await stripe.accountLinks.create({
             account: stripeAccount,
             refresh_url: 'https://stripe.com',
             return_url: 'https://engme.org',
             type: 'account_onboarding'
         })
-    
+
         const teacherData = db.collection('teachers').doc(teacher.id)
-    
+
         await teacherData.update({
             firstLoginLink: accountLink.url
         })
@@ -126,9 +125,9 @@ app.post('/create-teacher-account', async (req, res) => {
         return_url: 'https://engme.org',
         type: 'account_onboarding'
     })
-    
+
     const teacherRequestRef = db.doc(`teacherRequest/${request.id}`)
-    
+
     const user = await admin.auth().createUser({
         email: request.email,
         password
@@ -143,7 +142,7 @@ app.post('/create-teacher-account', async (req, res) => {
         stripeAccount: account.id
     })
 
-    
+
     const teacherRef = db.doc(`teachers/${uid}`);
 
     await teacherRef.set({
@@ -167,11 +166,11 @@ app.post('/create-teacher-account', async (req, res) => {
     await scheduleRef.add({
         numberOfDays: 6,
         slots: [
-        {
-            day: 'Sunday',
-            endTime: '2 PM',
-            startTime: '1 PM',
-        },
+            {
+                day: 'Sunday',
+                endTime: '2 PM',
+                startTime: '1 PM',
+            },
         ],
         teacherId: uid,
         hourlyRate: "0"
@@ -197,10 +196,9 @@ app.post('/create-checkout-session', async (req, res) => {
 
     console.log('TestApi')
 
-    if(program)
-    {
+    if (program) {
         const teacherStripeData = await teacherStripeRef.where('teacherId', '==', program.teacherId).limit(1).get()
-    
+
         const accountId = teacherStripeData.docs[0].data().stripeAccount
 
         const price = typeof program.price === 'string' ? parseInt(program.price) : program.price
@@ -208,7 +206,7 @@ app.post('/create-checkout-session', async (req, res) => {
 
         console.log("price: ", price)
         console.log("discount: ", discount)
-    
+
         const programItem = {
             price_data: {
                 currency: "usd",
@@ -220,7 +218,7 @@ app.post('/create-checkout-session', async (req, res) => {
             },
             quantity: 1
         }
-    
+
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             line_items: [programItem],
@@ -231,7 +229,7 @@ app.post('/create-checkout-session', async (req, res) => {
             payment_intent_data: {
                 transfer_data: {
                     destination: accountId,
-                    amount: Math.floor(((price * (1 - ((discount ?? 0) / 100))) * ( Number(program.teacherShare) / 100 )) * 100),
+                    amount: Math.floor(((price * (1 - ((discount ?? 0) / 100))) * (Number(program.teacherShare) / 100)) * 100),
                 },
             },
             metadata: {
@@ -239,14 +237,13 @@ app.post('/create-checkout-session', async (req, res) => {
                 programId: program.id
             }
         })
-    
+
         res.json({ id: session.id })
     }
-    else if(teacherId)
-    {
+    else if (teacherId) {
         console.log(teacherId)
         const teacherStripeData = await teacherStripeRef.where('teacherId', '==', teacherId).limit(1).get()
-    
+
         const accountId = teacherStripeData.docs[0].data().stripeAccount
 
         const consultationItem = {
@@ -278,11 +275,10 @@ app.post('/create-checkout-session', async (req, res) => {
                 teacherId
             }
         })
-    
+
         res.json({ id: session.id })
     }
-    else if(bundle) 
-    {
+    else if (bundle) {
         const teacherStripeData = await teacherStripeRef.where('teacherId', '==', bundle.teacherId).limit(1).get()
 
         const accountId = teacherStripeData.docs[0].data().stripeAccount
@@ -309,7 +305,7 @@ app.post('/create-checkout-session', async (req, res) => {
             payment_intent_data: {
                 transfer_data: {
                     destination: accountId,
-                    amount: Math.floor(((bundle.price * (1 - ((bundle?.discount ?? 0) / 100))) * ( Number(bundle.teacherShare) / 100 )) * 100),
+                    amount: Math.floor(((bundle.price * (1 - ((bundle?.discount ?? 0) / 100))) * (Number(bundle.teacherShare) / 100)) * 100),
                 },
             },
             metadata: {
@@ -317,56 +313,54 @@ app.post('/create-checkout-session', async (req, res) => {
                 programs: JSON.stringify(bundle.programs)
             }
         })
-    
+
         res.json({ id: session.id })
     }
 })
 
-app.post('/callback', express.raw({type: 'application/json'}), async (req, res) => {
+app.post('/callback', express.raw({ type: 'application/json' }), async (req, res) => {
     console.log('Entered Callback')
 
     const sig = req.headers['stripe-signature'];
 
     console.log('Entered Callback')
-    
+
     let event;
-    
+
     try {
         event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_ENDPOINT_SECRET);
     } catch (err) {
         // console.error('Webhook Error:', err.message);
         // return res.status(400).send(`Webhook Error: ${err.message}`);
     }
-    
+
     const db = admin.firestore()
 
     console.log("event: ", event)
     console.log("req.body: ", req.body)
-    
-    if(event?.type)
-    {
+
+    if (event?.type) {
         console.log("type: ", event.type)
     }
-    else if(req.body.type === 'checkout.session.completed')
-    {
-        if(req.body.data.object.payment_status === 'paid') {
+    else if (req.body.type === 'checkout.session.completed') {
+        if (req.body.data.object.payment_status === 'paid') {
             // Generate a unique order ID that includes the payment ID to prevent duplicates
             const uniqueOrderId = `order_${req.body.data.object.id}`;
-            
+
             try {
                 // Use a transaction to ensure atomicity
                 await db.runTransaction(async (transaction) => {
                     // Check if this order already exists
                     const orderRef = db.collection('orders').doc(uniqueOrderId);
                     const orderDoc = await transaction.get(orderRef);
-                    
+
                     if (orderDoc.exists) {
                         console.log(`Order ${uniqueOrderId} already processed, skipping`);
                         return;
                     }
-        
+
                     let newOrder;
-                    if(req.body.data.object.metadata.programId) {
+                    if (req.body.data.object.metadata.programId) {
                         newOrder = {
                             studentId: req.body.data.object.metadata.studentId,
                             programId: req.body.data.object.metadata.programId,
@@ -375,10 +369,10 @@ app.post('/callback', express.raw({type: 'application/json'}), async (req, res) 
                             createdAt: new Date(),
                             processed: false
                         };
-                        
+
                         await transaction.set(orderRef, newOrder);
                     }
-                    else if(req.body.data.object.metadata.teacherId) {
+                    else if (req.body.data.object.metadata.teacherId) {
                         const consultationRef = db.collection('ordersConsultations').doc(uniqueOrderId);
                         newOrder = {
                             studentId: req.body.data.object.metadata.studentId,
@@ -388,10 +382,10 @@ app.post('/callback', express.raw({type: 'application/json'}), async (req, res) 
                             createdAt: new Date(),
                             processed: false
                         };
-                        
+
                         await transaction.set(consultationRef, newOrder);
                     }
-                    else if(req.body.data.object.metadata.programs) {
+                    else if (req.body.data.object.metadata.programs) {
                         const programs = JSON.parse(req.body.data.object.metadata.programs);
                         newOrder = {
                             studentId: req.body.data.object.metadata.studentId,
@@ -401,7 +395,7 @@ app.post('/callback', express.raw({type: 'application/json'}), async (req, res) 
                             createdAt: new Date(),
                             processed: false
                         };
-                        
+
                         await transaction.set(orderRef, newOrder);
                     }
                 });
@@ -412,16 +406,16 @@ app.post('/callback', express.raw({type: 'application/json'}), async (req, res) 
             }
         }
     }
-    else if(req.body.type === 'capability.updated')
-    {
-        if(req.body.data.object.status === 'active')
-        {
+    else if (req.body.type === 'capability.updated') {
+        if (req.body.data.object.status === 'active') {
             const teacherStripeRef = db.collection('teacherStripe')
             const teacherStripeData = await teacherStripeRef.where('stripeAccount', '==', req.body.data.object.account).limit(1).get()
 
             const teacherId = teacherStripeData.docs[0].data().teacherId
 
             const teachersData = db.collection('teachers').doc(teacherId)
+
+            console.log(teacherId)
 
             await teachersData.update({
                 firstLoginLink: admin.firestore.FieldValue.delete()
